@@ -1,65 +1,56 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.IssuedDeviceRecord;
-import com.example.demo.repository.IssuedDeviceRecordRepository;
-import com.example.demo.service.IssuedDeviceRecordService;
+import com.example.demo.model.EmployeeProfile;
+import com.example.demo.repository.EmployeeProfileRepository;
+import com.example.demo.service.EmployeeProfileService;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class IssuedDeviceRecordServiceImpl implements IssuedDeviceRecordService {
+public class EmployeeProfileServiceImpl implements EmployeeProfileService {
 
-    private final IssuedDeviceRecordRepository repository;
+    private final EmployeeProfileRepository repository;
 
-    public IssuedDeviceRecordServiceImpl(IssuedDeviceRecordRepository repository) {
+    public EmployeeProfileServiceImpl(EmployeeProfileRepository repository) {
         this.repository = repository;
     }
 
     @Override
-    public IssuedDeviceRecord issueDevice(IssuedDeviceRecord record) {
-        List<IssuedDeviceRecord> activeIssues = repository.findActiveByEmployeeAndDevice(
-                record.getEmployee().getId(), 
-                record.getDeviceItem().getId()
-        );
-
-        if (!activeIssues.isEmpty()) {
-            throw new BadRequestException("Device already issued to this employee with active issuance");
+    public EmployeeProfile createEmployee(EmployeeProfile employee) {
+        if (repository.findByEmployeeId(employee.getEmployeeId()).isPresent()) {
+            throw new BadRequestException("Employee with ID " + employee.getEmployeeId() + " already exists");
         }
-
-        record.setStatus("ISSUED");
-        record.setIssuedDate(LocalDate.now());
-        return repository.save(record);
-    }
-
-    @Override
-    public IssuedDeviceRecord returnDevice(Long recordId) {
-        IssuedDeviceRecord record = getRecordById(recordId);
-
-        if ("RETURNED".equals(record.getStatus())) {
-            throw new BadRequestException("Device already returned");
+        if (repository.findByEmail(employee.getEmail()).isPresent()) {
+            throw new BadRequestException("Email " + employee.getEmail() + " already exists");
         }
-
-        record.setStatus("RETURNED");
-        record.setReturnedDate(LocalDate.now());
-        return repository.save(record);
+        return repository.save(employee);
     }
 
     @Override
-    public List<IssuedDeviceRecord> getIssuedDevicesByEmployee(Long employeeId) {
-        return repository.findByEmployeeId(employeeId);
-    }
-
-    @Override
-    public IssuedDeviceRecord getRecordById(Long id) {
+    public EmployeeProfile getEmployeeById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Record not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
     }
 
     @Override
-    public List<IssuedDeviceRecord> getAllRecords() {
+    public List<EmployeeProfile> getAllEmployees() {
         return repository.findAll();
+    }
+
+    @Override
+    public EmployeeProfile updateEmployeeStatus(Long id, boolean active) {
+        EmployeeProfile employee = getEmployeeById(id);
+        employee.setActive(active);
+        return repository.save(employee);
+    }
+
+    @Override
+    public void deleteEmployee(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Employee not found with id: " + id);
+        }
+        repository.deleteById(id);
     }
 }
