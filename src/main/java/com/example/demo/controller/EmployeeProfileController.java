@@ -1,9 +1,5 @@
 package com.example.demo.controller;
 
-public class EmployeeProfileController {
-
-}
-package com.example.demo.controller;
 import com.example.demo.dto.EmployeeDto;
 import com.example.demo.model.EmployeeProfile;
 import com.example.demo.service.EmployeeProfileService;
@@ -13,51 +9,43 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/employees")
-@Tag(name = "Employee Management")
+@Tag(name = "Employees", description = "Employee profile management")
 public class EmployeeProfileController {
-    private final EmployeeProfileService employeeProfileService;
 
-    public EmployeeProfileController(EmployeeProfileService employeeProfileService) {
-        this.employeeProfileService = employeeProfileService;
-    }
+    private final EmployeeProfileService service;
+    public EmployeeProfileController(EmployeeProfileService service) { this.service = service; }
 
     @PostMapping
-    @Operation(summary = "Create Employee")
-    public ResponseEntity<EmployeeDto> createEmployee(@RequestBody EmployeeProfile employee) {
-        EmployeeProfile created = employeeProfileService.createEmployee(employee);
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToDto(created));
-    }
-
-    @GetMapping
-    @Operation(summary = "Get All Employees")
-    public ResponseEntity<List<EmployeeDto>> getAllEmployees() {
-        return ResponseEntity.ok(employeeProfileService.getAllEmployees().stream().map(this::convertToDto).collect(Collectors.toList()));
+    @Operation(summary = "Create employee")
+    public ResponseEntity<EmployeeProfile> createEmployee(@RequestBody EmployeeProfile employee) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createEmployee(employee));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get Employee")
-    public ResponseEntity<EmployeeDto> getEmployee(@PathVariable Long id) {
-        return ResponseEntity.ok(convertToDto(employeeProfileService.getEmployeeById(id)));
+    @Operation(summary = "Get employee by ID")
+    public ResponseEntity<EmployeeProfile> getEmployee(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getEmployeeById(id));
+    }
+
+    @GetMapping
+    @Operation(summary = "Get all employees")
+    public ResponseEntity<List<EmployeeProfile>> getAllEmployees() {
+        return ResponseEntity.ok(service.getAllEmployees());
     }
 
     @PutMapping("/{id}/status")
-    @Operation(summary = "Update Status")
-    public ResponseEntity<EmployeeDto> updateStatus(@PathVariable Long id, @RequestParam boolean active) {
-        return ResponseEntity.ok(convertToDto(employeeProfileService.updateEmployeeStatus(id, active)));
+    @Operation(summary = "Update employee active status")
+    public ResponseEntity<EmployeeProfile> updateStatus(@PathVariable Long id, @RequestParam boolean active) {
+        return ResponseEntity.ok(service.updateEmployeeStatus(id, active));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete Employee")
+    @Operation(summary = "Delete employee")
     public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
-        employeeProfileService.deleteEmployee(id);
+        service.deleteEmployee(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private EmployeeDto convertToDto(EmployeeProfile emp) {
-        return new EmployeeDto(emp.getId(), emp.getEmployeeId(), emp.getFullName(), emp.getEmail(), emp.getDepartment(), emp.getJobRole(), emp.getActive());
     }
 }

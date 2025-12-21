@@ -1,5 +1,5 @@
 package com.example.demo.controller;
-import com.example.demo.dto.IssuedDeviceDto;
+
 import com.example.demo.model.IssuedDeviceRecord;
 import com.example.demo.service.IssuedDeviceRecordService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,49 +8,42 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/issued-devices")
-@Tag(name = "Device Issuance")
+@Tag(name = "Issued Devices", description = "Device issuance management")
 public class IssuedDeviceRecordController {
-    private final IssuedDeviceRecordService service;
 
-    public IssuedDeviceRecordController(IssuedDeviceRecordService service) {
-        this.service = service;
-    }
+    private final IssuedDeviceRecordService service;
+    public IssuedDeviceRecordController(IssuedDeviceRecordService service) { this.service = service; }
 
     @PostMapping
-    @Operation(summary = "Issue Device")
-    public ResponseEntity<IssuedDeviceDto> issue(@RequestBody IssuedDeviceRecord record) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToDto(service.issueDevice(record)));
+    @Operation(summary = "Issue device to employee")
+    public ResponseEntity<IssuedDeviceRecord> issueDevice(@RequestBody IssuedDeviceRecord record) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueDevice(record));
     }
 
     @PutMapping("/{id}/return")
-    @Operation(summary = "Return Device")
-    public ResponseEntity<IssuedDeviceDto> returnDevice(@PathVariable Long id) {
-        return ResponseEntity.ok(convertToDto(service.returnDevice(id)));
+    @Operation(summary = "Return device from employee")
+    public ResponseEntity<IssuedDeviceRecord> returnDevice(@PathVariable Long id) {
+        return ResponseEntity.ok(service.returnDevice(id));
     }
 
     @GetMapping("/employee/{employeeId}")
-    @Operation(summary = "Get Employee Devices")
-    public ResponseEntity<List<IssuedDeviceDto>> getEmployeeDevices(@PathVariable Long employeeId) {
-        return ResponseEntity.ok(service.getIssuedDevicesByEmployee(employeeId).stream().map(this::convertToDto).collect(Collectors.toList()));
+    @Operation(summary = "Get issued devices for employee")
+    public ResponseEntity<List<IssuedDeviceRecord>> getDevicesForEmployee(@PathVariable Long employeeId) {
+        return ResponseEntity.ok(service.getIssuedDevicesByEmployee(employeeId));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get Record")
-    public ResponseEntity<IssuedDeviceDto> getRecord(@PathVariable Long id) {
-        return ResponseEntity.ok(convertToDto(service.getRecordById(id)));
+    @Operation(summary = "Get issued device record by ID")
+    public ResponseEntity<IssuedDeviceRecord> getRecord(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getRecordById(id));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        service.deleteRecord(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    private IssuedDeviceDto convertToDto(IssuedDeviceRecord record) {
-        return new IssuedDeviceDto(record.getId(), record.getEmployee().getId(), record.getDeviceItem().getId(), record.getIssuedDate(), record.getReturnedDate(), record.getStatus());
+    @GetMapping
+    @Operation(summary = "Get all issued device records")
+    public ResponseEntity<List<IssuedDeviceRecord>> getAllRecords() {
+        return ResponseEntity.ok(service.getAllRecords());
     }
 }

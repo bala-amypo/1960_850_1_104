@@ -1,5 +1,5 @@
 package com.example.demo.controller;
-import com.example.demo.dto.DeviceDto;
+
 import com.example.demo.model.DeviceCatalogItem;
 import com.example.demo.service.DeviceCatalogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,50 +8,43 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/devices")
-@Tag(name = "Device Catalog")
+@Tag(name = "Devices", description = "Device catalog management")
 public class DeviceCatalogController {
-    private final DeviceCatalogService deviceCatalogService;
 
-    public DeviceCatalogController(DeviceCatalogService deviceCatalogService) {
-        this.deviceCatalogService = deviceCatalogService;
-    }
+    private final DeviceCatalogService service;
+    public DeviceCatalogController(DeviceCatalogService service) { this.service = service; }
 
     @PostMapping
-    @Operation(summary = "Create Device")
-    public ResponseEntity<DeviceDto> createDevice(@RequestBody DeviceCatalogItem item) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToDto(deviceCatalogService.createItem(item)));
-    }
-
-    @GetMapping
-    @Operation(summary = "Get All Devices")
-    public ResponseEntity<List<DeviceDto>> getAllDevices() {
-        return ResponseEntity.ok(deviceCatalogService.getAllItems().stream().map(this::convertToDto).collect(Collectors.toList()));
+    @Operation(summary = "Create device")
+    public ResponseEntity<DeviceCatalogItem> createDevice(@RequestBody DeviceCatalogItem device) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createItem(device));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get Device")
-    public ResponseEntity<DeviceDto> getDevice(@PathVariable Long id) {
-        return ResponseEntity.ok(convertToDto(deviceCatalogService.getItemById(id)));
+    @Operation(summary = "Get device by ID")
+    public ResponseEntity<DeviceCatalogItem> getDevice(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getItemById(id));
     }
 
-    @PutMapping("/{id}/active")
-    @Operation(summary = "Update Status")
-    public ResponseEntity<DeviceDto> updateStatus(@PathVariable Long id, @RequestParam boolean active) {
-        return ResponseEntity.ok(convertToDto(deviceCatalogService.updateActiveStatus(id, active)));
+    @GetMapping
+    @Operation(summary = "Get all devices")
+    public ResponseEntity<List<DeviceCatalogItem>> getAllDevices() {
+        return ResponseEntity.ok(service.getAllItems());
+    }
+
+    @PutMapping("/{id}/status")
+    @Operation(summary = "Update device active status")
+    public ResponseEntity<DeviceCatalogItem> updateStatus(@PathVariable Long id, @RequestParam boolean active) {
+        return ResponseEntity.ok(service.updateActiveStatus(id, active));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete Device")
+    @Operation(summary = "Delete device")
     public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
-        deviceCatalogService.deleteItem(id);
+        service.deleteItem(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private DeviceDto convertToDto(DeviceCatalogItem item) {
-        return new DeviceDto(item.getId(), item.getDeviceCode(), item.getDeviceType(), item.getModel(), item.getMaxAllowedPerEmployee(), item.getActive());
     }
 }
