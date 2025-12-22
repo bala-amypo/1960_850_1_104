@@ -12,33 +12,40 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
-@Tag(name = "Authentication", description = "User authentication endpoints")
+@RequestMapping("/auth")
+@Tag(name = "Authentication", description = "User registration and login (no security yet)")
 public class AuthController {
 
     private final UserAccountService userService;
-    public AuthController(UserAccountService userService) { this.userService = userService; }
+
+    public AuthController(UserAccountService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/register")
-    @Operation(summary = "Register new user")
+    @Operation(summary = "Register new user (no JWT yet)")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         UserAccount user = new UserAccount();
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
+        // store raw password for now; hashing will be added when security is implemented
+        user.setPasswordHash(request.getPassword());
         user.setRole(request.getRole());
         user.setActive(true);
 
         UserAccount created = userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                new AuthResponse(null, created.getId(), created.getEmail(), created.getRole())
-        );
+
+        // no token yet
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new AuthResponse(null, created.getId(), created.getEmail(), created.getRole()));
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Login user")
+    @Operation(summary = "Login user (no JWT yet)")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
         UserAccount user = userService.authenticate(request.getEmail(), request.getPassword());
-        return ResponseEntity.ok(new AuthResponse(null, user.getId(), user.getEmail(), user.getRole()));
+        return ResponseEntity.ok(
+                new AuthResponse(null, user.getId(), user.getEmail(), user.getRole())
+        );
     }
 }

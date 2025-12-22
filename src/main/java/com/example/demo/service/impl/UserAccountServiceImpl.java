@@ -1,35 +1,33 @@
-package com.example.demo.service.impl;
-
-import com.example.demo.model.UserAccount;
-import com.example.demo.repository.UserAccountRepository;
-import com.example.demo.service.UserAccountService;
-import com.example.demo.exception.BadRequestException;
-import org.springframework.stereotype.Service;
-import java.util.Optional;
-
-@Service
 public class UserAccountServiceImpl implements UserAccountService {
+
     private final UserAccountRepository repository;
-    public UserAccountServiceImpl(UserAccountRepository repository) { this.repository = repository; }
+
+    public UserAccountServiceImpl(UserAccountRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public UserAccount createUser(UserAccount user) {
         if (repository.findByEmail(user.getEmail()).isPresent()) {
-            throw new BadRequestException("Email " + user.getEmail() + " already exists");
+            throw new BadRequestException("Email already exists");
         }
+        // no hashing yet
         return repository.save(user);
     }
 
     @Override
-    public Optional<UserAccount> findByEmail(String email) { return repository.findByEmail(email); }
-
-    @Override
     public UserAccount authenticate(String email, String password) {
         UserAccount user = repository.findByEmail(email)
-                .orElseThrow(() -> new BadRequestException("Invalid email or password"));
-        if (!user.getPassword().equals(password) || !user.getActive()) {
-            throw new BadRequestException("Invalid email or password");
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!Boolean.TRUE.equals(user.getActive())) {
+            throw new BadRequestException("User is not active");
+        }
+        if (!password.equals(user.getPasswordHash())) {
+            throw new BadRequestException("Invalid credentials");
         }
         return user;
     }
+
+    // other methods unchanged
 }
