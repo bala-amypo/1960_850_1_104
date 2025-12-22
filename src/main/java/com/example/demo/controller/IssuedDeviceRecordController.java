@@ -26,7 +26,7 @@ public class IssuedDeviceRecordController {
     @PostMapping
     @Operation(summary = "Issue device to employee")
     public ResponseEntity<IssuedDeviceDto> issueDevice(@RequestBody IssuedDeviceDto deviceDto) {
-        IssuedDeviceRecord created = service.issueDevice(deviceDto.getEmployeeId(), deviceDto.getDeviceId());
+        IssuedDeviceRecord created = service.issueDevice(deviceDto.getEmployeeId(), deviceDto.getDeviceItemId());
         return ResponseEntity.status(HttpStatus.CREATED).body(mapToDto(created));
     }
 
