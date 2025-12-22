@@ -1,11 +1,14 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.IssuedDeviceRecord;
-import com.example.demo.repository.IssuedDeviceRecordRepository;
-import com.example.demo.service.IssuedDeviceRecordService;
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.model.IssuedDeviceRecord;
+import com.example.demo.repository.IssuedDeviceRecordRepository;
+import com.example.demo.repository.EmployeeProfileRepository;
+import com.example.demo.repository.DeviceCatalogItemRepository;
+import com.example.demo.service.IssuedDeviceRecordService;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -13,53 +16,59 @@ import java.util.List;
 public class IssuedDeviceRecordServiceImpl implements IssuedDeviceRecordService {
 
     private final IssuedDeviceRecordRepository repository;
+    private final EmployeeProfileRepository employeeRepository;
+    private final DeviceCatalogItemRepository deviceRepository;
 
-    public IssuedDeviceRecordServiceImpl(IssuedDeviceRecordRepository repository) {
+    public IssuedDeviceRecordServiceImpl(IssuedDeviceRecordRepository repository,
+                                       EmployeeProfileRepository employeeRepository,
+                                       DeviceCatalogItemRepository deviceRepository) {
         this.repository = repository;
+        this.employeeRepository = employeeRepository;
+        this.deviceRepository = deviceRepository;
     }
 
     @Override
     public IssuedDeviceRecord issueDevice(IssuedDeviceRecord record) {
-        List<IssuedDeviceRecord> activeIssues = repository.findActiveByEmployeeAndDevice(
-                record.getEmployee().getId(), 
-                record.getDeviceItem().getId()
-        );
-
-        if (!activeIssues.isEmpty()) {
-            throw new BadRequestException("Device already issued to this employee with active issuance");
+        if (!employeeRepository.existsById(record.getEmployee().getId())) {
+            throw new ResourceNotFoundException("Employee not found");
+        }
+        if (!deviceRepository.existsById(record.getDevice().getId())) {
+            throw new ResourceNotFoundException("Device not found");
         }
 
-        record.setStatus("ISSUED");
+        List<IssuedDeviceRecord> active = repository.findActiveByEmployeeAndDevice(
+                record.getEmployee().getId(), record.getDevice().getId());
+        if (!active.isEmpty()) {
+            throw new BadRequestException("active issuance already exists for this employee-device combination");
+        }
+
         record.setIssuedDate(LocalDate.now());
+        record.setStatus("ISSUED");
         return repository.save(record);
     }
 
     @Override
     public IssuedDeviceRecord returnDevice(Long recordId) {
         IssuedDeviceRecord record = getRecordById(recordId);
-
         if ("RETURNED".equals(record.getStatus())) {
             throw new BadRequestException("Device already returned");
         }
-
-        record.setStatus("RETURNED");
         record.setReturnedDate(LocalDate.now());
+        record.setStatus("RETURNED");
         return repository.save(record);
     }
 
     @Override
     public List<IssuedDeviceRecord> getIssuedDevicesByEmployee(Long employeeId) {
+        if (!employeeRepository.existsById(employeeId)) {
+            throw new ResourceNotFoundException("Employee not found");
+        }
         return repository.findByEmployeeId(employeeId);
     }
 
     @Override
     public IssuedDeviceRecord getRecordById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Record not found with id: " + id));
-    }
-
-    @Override
-    public List<IssuedDeviceRecord> getAllRecords() {
-        return repository.findAll();
+                .orElseThrow(() -> new ResourceNotFoundException("Issued device record not found with id: " + id));
     }
 }

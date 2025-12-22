@@ -1,11 +1,12 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.DeviceCatalogItem;
 import com.example.demo.repository.DeviceCatalogItemRepository;
 import com.example.demo.service.DeviceCatalogService;
-import com.example.demo.exception.BadRequestException;
-import com.example.demo.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -20,20 +21,12 @@ public class DeviceCatalogServiceImpl implements DeviceCatalogService {
     @Override
     public DeviceCatalogItem createItem(DeviceCatalogItem item) {
         if (repository.findByDeviceCode(item.getDeviceCode()).isPresent()) {
-            throw new BadRequestException("Device with code " + item.getDeviceCode() + " already exists");
+            throw new BadRequestException("Device code already exists");
+        }
+        if (item.getMaxAllowedPerEmployee() <= 0) {
+            throw new BadRequestException("maxAllowedPerEmployee must be greater than 0");
         }
         return repository.save(item);
-    }
-
-    @Override
-    public DeviceCatalogItem getItemById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + id));
-    }
-
-    @Override
-    public List<DeviceCatalogItem> getAllItems() {
-        return repository.findAll();
     }
 
     @Override
@@ -44,10 +37,13 @@ public class DeviceCatalogServiceImpl implements DeviceCatalogService {
     }
 
     @Override
-    public void deleteItem(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Device not found with id: " + id);
-        }
-        repository.deleteById(id);
+    public List<DeviceCatalogItem> getAllItems() {
+        return repository.findAll();
+    }
+
+    @Override
+    public DeviceCatalogItem getItemById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + id));
     }
 }

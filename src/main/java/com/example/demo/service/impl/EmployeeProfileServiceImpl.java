@@ -1,11 +1,12 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.exception.BadRequestException;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.EmployeeProfile;
 import com.example.demo.repository.EmployeeProfileRepository;
 import com.example.demo.service.EmployeeProfileService;
-import com.example.demo.exception.BadRequestException;
-import com.example.demo.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -20,10 +21,10 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
     @Override
     public EmployeeProfile createEmployee(EmployeeProfile employee) {
         if (repository.findByEmployeeId(employee.getEmployeeId()).isPresent()) {
-            throw new BadRequestException("Employee with ID " + employee.getEmployeeId() + " already exists");
+            throw new BadRequestException("EmployeeId already exists");
         }
         if (repository.findByEmail(employee.getEmail()).isPresent()) {
-            throw new BadRequestException("Email " + employee.getEmail() + " already exists");
+            throw new BadRequestException("Email already exists");
         }
         return repository.save(employee);
     }
@@ -48,9 +49,7 @@ public class EmployeeProfileServiceImpl implements EmployeeProfileService {
 
     @Override
     public void deleteEmployee(Long id) {
-        if (!repository.existsById(id)) {
-            throw new ResourceNotFoundException("Employee not found with id: " + id);
-        }
-        repository.deleteById(id);
+        EmployeeProfile employee = getEmployeeById(id);
+        repository.delete(employee);
     }
 }
