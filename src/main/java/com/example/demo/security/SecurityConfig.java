@@ -43,7 +43,7 @@ public class SecurityConfig {
                 // public endpoints
                 .requestMatchers("/auth/**", "swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // everything under /api/** needs JWT
-                .requestMatchers("/api/**").authenticated()
+                // .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
