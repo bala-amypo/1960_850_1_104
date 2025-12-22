@@ -28,20 +28,20 @@ public class IssuedDeviceRecordServiceImpl implements IssuedDeviceRecordService 
     }
 
     @Override
-    public IssuedDeviceRecord issueDevice(IssuedDeviceRecord record) {
-        if (!employeeRepository.existsById(record.getEmployee().getId())) {
-            throw new ResourceNotFoundException("Employee not found");
-        }
-        if (!deviceRepository.existsById(record.getDevice().getId())) {
-            throw new ResourceNotFoundException("Device not found");
-        }
+    public IssuedDeviceRecord issueDevice(Long employeeId, Long deviceId) {
+        var employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        var device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
 
-        List<IssuedDeviceRecord> active = repository.findActiveByEmployeeAndDevice(
-                record.getEmployee().getId(), record.getDevice().getId());
+        List<IssuedDeviceRecord> active = repository.findActiveByEmployeeAndDevice(employeeId, deviceId);
         if (!active.isEmpty()) {
-            throw new BadRequestException("active issuance already exists for this employee-device combination");
+            throw new BadRequestException("Active issuance already exists for this employee-device combination");
         }
 
+        IssuedDeviceRecord record = new IssuedDeviceRecord();
+        record.setEmployee(employee);
+        record.setDevice(device);
         record.setIssuedDate(LocalDate.now());
         record.setStatus("ISSUED");
         return repository.save(record);
