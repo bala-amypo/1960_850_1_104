@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.IssuedDeviceDto;
 import com.example.demo.model.IssuedDeviceRecord;
 import com.example.demo.service.IssuedDeviceRecordService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -7,43 +8,52 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/issued-devices")
-@Tag(name = "Issued Devices", description = "Device issuance management")
+@Tag(name = "Issued Device Records", description = "Device issuance and return management")
 public class IssuedDeviceRecordController {
 
     private final IssuedDeviceRecordService service;
-    public IssuedDeviceRecordController(IssuedDeviceRecordService service) { this.service = service; }
+
+    public IssuedDeviceRecordController(IssuedDeviceRecordService service) {
+        this.service = service;
+    }
 
     @PostMapping
     @Operation(summary = "Issue device to employee")
-    public ResponseEntity<IssuedDeviceRecord> issueDevice(@RequestBody IssuedDeviceRecord record) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.issueDevice(record));
+    public ResponseEntity<IssuedDeviceDto> issueDevice(@RequestBody IssuedDeviceRecord record) {
+        IssuedDeviceRecord created = service.issueDevice(record);
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapToDto(created));
     }
 
     @PutMapping("/{id}/return")
     @Operation(summary = "Return device from employee")
-    public ResponseEntity<IssuedDeviceRecord> returnDevice(@PathVariable Long id) {
-        return ResponseEntity.ok(service.returnDevice(id));
+    public ResponseEntity<IssuedDeviceDto> returnDevice(@PathVariable Long id) {
+        IssuedDeviceRecord updated = service.returnDevice(id);
+        return ResponseEntity.ok(mapToDto(updated));
     }
 
     @GetMapping("/employee/{employeeId}")
     @Operation(summary = "Get issued devices for employee")
-    public ResponseEntity<List<IssuedDeviceRecord>> getDevicesForEmployee(@PathVariable Long employeeId) {
-        return ResponseEntity.ok(service.getIssuedDevicesByEmployee(employeeId));
+    public ResponseEntity<List<IssuedDeviceDto>> getIssuedDevicesByEmployee(@PathVariable Long employeeId) {
+        List<IssuedDeviceRecord> records = service.getIssuedDevicesByEmployee(employeeId);
+        return ResponseEntity.ok(records.stream().map(this::mapToDto).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get issued device record by ID")
-    public ResponseEntity<IssuedDeviceRecord> getRecord(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getRecordById(id));
+    public ResponseEntity<IssuedDeviceDto> getRecordById(@PathVariable Long id) {
+        IssuedDeviceRecord record = service.getRecordById(id);
+        return ResponseEntity.ok(mapToDto(record));
     }
 
-    @GetMapping
-    @Operation(summary = "Get all issued device records")
-    public ResponseEntity<List<IssuedDeviceRecord>> getAllRecords() {
-        return ResponseEntity.ok(service.getAllRecords());
+    private IssuedDeviceDto mapToDto(IssuedDeviceRecord record) {
+        return new IssuedDeviceDto(record.getId(), record.getEmployee().getId(), 
+                record.getDevice().getId(), record.getIssuedDate(), 
+                record.getReturnedDate(), record.getStatus());
     }
 }
