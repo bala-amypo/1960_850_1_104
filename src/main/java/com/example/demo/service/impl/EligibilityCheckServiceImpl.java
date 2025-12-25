@@ -33,22 +33,26 @@ public class EligibilityCheckServiceImpl implements EligibilityCheckService {
     @Override
     public EligibilityCheckRecord validateEligibility(Long employeeId, Long deviceItemId) {
         // Check employee exists and is active
-        EmployeeProfile employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        EmployeeProfile employee = employeeRepository.findById(employeeId).orElse(null);
+        DeviceCatalogItem device = deviceRepository.findById(deviceItemId).orElse(null);
+
+        if (employee == null || device == null) {
+            EligibilityCheckRecord record = new EligibilityCheckRecord();
+            record.setEmployeeId(employeeId);
+            record.setDeviceItemId(deviceItemId);
+            record.setIsEligible(false);
+            record.setReason("Employee or device not found");
+            return checkRepository.save(record);
+        }
 
         if (!employee.getActive()) {
             EligibilityCheckRecord record = new EligibilityCheckRecord();
             record.setEmployee(employee);
-            record.setDevice(deviceRepository.findById(deviceItemId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Device not found")));
+            record.setDevice(device);
             record.setIsEligible(false);
             record.setReason("Employee is not active");
             return checkRepository.save(record);
         }
-
-        // Check device exists and is active
-        DeviceCatalogItem device = deviceRepository.findById(deviceItemId)
-                .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
 
         if (!device.getActive()) {
             EligibilityCheckRecord record = new EligibilityCheckRecord();
@@ -118,9 +122,6 @@ public class EligibilityCheckServiceImpl implements EligibilityCheckService {
 
     @Override
     public List<EligibilityCheckRecord> getChecksByEmployee(Long employeeId) {
-        if (!employeeRepository.existsById(employeeId)) {
-            throw new ResourceNotFoundException("Employee not found");
-        }
         return checkRepository.findByEmployeeId(employeeId);
     }
 
