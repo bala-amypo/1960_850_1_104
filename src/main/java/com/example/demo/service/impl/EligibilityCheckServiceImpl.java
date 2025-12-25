@@ -18,11 +18,11 @@ public class EligibilityCheckServiceImpl implements EligibilityCheckService {
     private final IssuedDeviceRecordRepository issuedRepository;
     private final PolicyRuleRepository policyRepository;
 
-    public EligibilityCheckServiceImpl(EligibilityCheckRecordRepository checkRepository,
-                                      EmployeeProfileRepository employeeRepository,
+    public EligibilityCheckServiceImpl(EmployeeProfileRepository employeeRepository,
                                       DeviceCatalogItemRepository deviceRepository,
                                       IssuedDeviceRecordRepository issuedRepository,
-                                      PolicyRuleRepository policyRepository) {
+                                      PolicyRuleRepository policyRepository,
+                                      EligibilityCheckRecordRepository checkRepository) {
         this.checkRepository = checkRepository;
         this.employeeRepository = employeeRepository;
         this.deviceRepository = deviceRepository;
