@@ -25,6 +25,12 @@ public class EligibilityCheckRecord {
     @JoinColumn(name = "device_item_id", nullable = false)
     private DeviceCatalogItem device;
 
+    @Column(name = "employee_id", insertable = false, updatable = false)
+    private Long employeeId;
+
+    @Column(name = "device_item_id", insertable = false, updatable = false)
+    private Long deviceItemId;
+
     @Column(nullable = false)
     private Boolean isEligible;
 
@@ -37,5 +43,9 @@ public class EligibilityCheckRecord {
     @PrePersist
     protected void onCreate() {
         checkedAt = LocalDateTime.now();
+    }
+
+    public void prePersist() {
+        onCreate();
     }
 }

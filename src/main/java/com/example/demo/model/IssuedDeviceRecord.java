@@ -25,6 +25,12 @@ public class IssuedDeviceRecord {
     @JoinColumn(name = "device_item_id", nullable = false)
     private DeviceCatalogItem device;
 
+    @Column(name = "employee_id", insertable = false, updatable = false)
+    private Long employeeId;
+
+    @Column(name = "device_item_id", insertable = false, updatable = false)
+    private Long deviceItemId;
+
     @Column(nullable = false)
     private LocalDate issuedDate;
 
