@@ -1,7 +1,5 @@
 package com.example.demo.dto;
 
-/*
-// AUTH RESPONSE DTO COMMENTED OUT
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,4 +13,3 @@ public class AuthResponse {
     private String email;
     private String role;
 }
-*/
