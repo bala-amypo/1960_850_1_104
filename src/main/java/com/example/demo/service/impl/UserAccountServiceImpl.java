@@ -1,6 +1,6 @@
 package com.example.demo.service.impl;
 
-/*
+
 // USER ACCOUNT SERVICE IMPLEMENTATION COMMENTED OUT
 import com.example.demo.exception.BadRequestException;
 import com.example.demo.exception.ResourceNotFoundException;
@@ -59,50 +59,50 @@ public class UserAccountServiceImpl implements UserAccountService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 }
-*/
 
-// Simple implementation without security
-import com.example.demo.exception.BadRequestException;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.model.UserAccount;
-import com.example.demo.repository.UserAccountRepository;
-import com.example.demo.service.UserAccountService;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+// // Simple implementation without security
+// import com.example.demo.exception.BadRequestException;
+// import com.example.demo.exception.ResourceNotFoundException;
+// import com.example.demo.model.UserAccount;
+// import com.example.demo.repository.UserAccountRepository;
+// import com.example.demo.service.UserAccountService;
+// import org.springframework.stereotype.Service;
 
-@Service
-public class UserAccountServiceImpl implements UserAccountService {
+// import java.util.List;
 
-    private final UserAccountRepository repository;
+// @Service
+// public class UserAccountServiceImpl implements UserAccountService {
 
-    public UserAccountServiceImpl(UserAccountRepository repository) {
-        this.repository = repository;
-    }
+//     private final UserAccountRepository repository;
 
-    @Override
-    public UserAccount createUser(UserAccount user) {
-        if (repository.findByEmail(user.getEmail()).isPresent()) {
-            throw new BadRequestException("Email already exists");
-        }
-        return repository.save(user);
-    }
+//     public UserAccountServiceImpl(UserAccountRepository repository) {
+//         this.repository = repository;
+//     }
 
-    @Override
-    public UserAccount authenticate(String email, String password) {
-        UserAccount user = repository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return user;
-    }
+//     @Override
+//     public UserAccount createUser(UserAccount user) {
+//         if (repository.findByEmail(user.getEmail()).isPresent()) {
+//             throw new BadRequestException("Email already exists");
+//         }
+//         return repository.save(user);
+//     }
 
-    @Override
-    public List<UserAccount> getAllUsers() {
-        return repository.findAll();
-    }
+//     @Override
+//     public UserAccount authenticate(String email, String password) {
+//         UserAccount user = repository.findByEmail(email)
+//                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+//         return user;
+//     }
 
-    @Override
-    public UserAccount getUserById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-    }
-}
+//     @Override
+//     public List<UserAccount> getAllUsers() {
+//         return repository.findAll();
+//     }
+
+//     @Override
+//     public UserAccount getUserById(Long id) {
+//         return repository.findById(id)
+//                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+//     }
+// }
