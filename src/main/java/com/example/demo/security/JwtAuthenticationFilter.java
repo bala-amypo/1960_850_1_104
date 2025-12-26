@@ -1,6 +1,6 @@
 package com.example.demo.security;
 
-/*
+
 // JWT AUTHENTICATION FILTER COMMENTED OUT
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -56,4 +56,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 }
-*/
+

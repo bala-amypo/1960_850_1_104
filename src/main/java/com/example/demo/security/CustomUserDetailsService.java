@@ -1,6 +1,6 @@
 package com.example.demo.security;
 
-/*
+
 // CUSTOM USER DETAILS SERVICE COMMENTED OUT
 import com.example.demo.model.UserAccount;
 import com.example.demo.repository.UserAccountRepository;
@@ -46,4 +46,4 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .build();
     }
 }
-*/
+
