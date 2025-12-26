@@ -3,7 +3,7 @@ package com.example.demo.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+
 import io.jsonwebtoken.security.Keys;
 import com.example.demo.model.UserAccount;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,7 +35,7 @@ public class JwtTokenProvider {
                 .claim("role", user.getRole())
                 .issuedAt(now)
                 .expiration(validity)
-                .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS256)
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
                 .compact();
     }
 
